@@ -1,0 +1,87 @@
+service: serverless-dev-austausch-demo
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+    packager: yarn
+
+  dynamodb:
+    start:
+      inMemory: true
+      migrate: true
+
+provider:
+  name: aws
+  region: eu-central-1
+  runtime: nodejs8.10
+  stage: dev
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+
+functions:
+  hello-jameda:
+    handler: src/jameda/hello.default
+    events:
+      - http:
+          method: get
+          path: hello
+
+  api-insert:
+    handler: src/api/insert.default
+    events:
+      - http:
+          method: post
+          path: api/insert
+
+  api-get-all:
+    handler: src/api/get.all
+    events:
+      - http:
+          method: get
+          path: api/get
+
+  api-get-item:
+    handler: src/api/get.byId
+    events:
+      - http:
+          method: get
+          path: api/get/{id}
+
+  messages-app:
+    handler: src/jameda/messages.default
+    events:
+      - http:
+          method: get
+          path: messages
+
+resources:
+  Resources:
+    App:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
