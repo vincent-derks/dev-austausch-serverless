@@ -627,6 +627,12 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@rauschma/stringio@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rauschma/stringio/-/stringio-1.4.0.tgz#0b667bea726652a10a48dfc1dadc89e0ec51e269"
+  dependencies:
+    "@types/node" "^10.0.3"
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"
@@ -648,6 +654,10 @@
     querystring "^0.2.0"
     ramda "^0.25.0"
     source-map-support "^0.5.5"
+
+"@types/node@^10.0.3":
+  version "10.9.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.2.tgz#f0ab8dced5cd6c56b26765e1c0d9e4fdcc9f2a00"
 
 "@webassemblyjs/ast@1.5.13":
   version "1.5.13"

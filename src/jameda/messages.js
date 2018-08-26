@@ -1,9 +1,9 @@
 import fs from 'fs';
-import path from 'path';
+import { readableToString } from '@rauschma/stringio';
 
 export default async () => {
-  const template = fs.readFile(path.join(__DIR__, 'src/jameda/messages.html'));
-  console.log(template);
+  const template = fs.ReadStream('src/jameda/messagesTemplate.html');
+  const html = await readableToString(template);
   return {
     statusCode: 200,
     headers: {
