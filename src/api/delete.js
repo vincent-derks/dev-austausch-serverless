@@ -4,6 +4,6 @@ export default async event => {
   const {
     pathParameters: { id }
   } = event;
-  const params = { TableName: process.env.DYNAMODB_TABLE, Key: id };
+  const params = { Key: { id } };
   return client.delete(params).promise();
 };

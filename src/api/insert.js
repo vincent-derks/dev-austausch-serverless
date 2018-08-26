@@ -7,7 +7,6 @@ export default async event => {
   const now = +new Date();
   await client
     .put({
-      TableName: process.env.DYNAMODB_TABLE,
       Item: {
         id,
         inserted_at: now,

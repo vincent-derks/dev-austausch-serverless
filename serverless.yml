@@ -34,13 +34,6 @@ provider:
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
 
 functions:
-  hello-jameda:
-    handler: src/jameda/hello.default
-    events:
-      - http:
-          method: get
-          path: hello
-
   api-insert:
     handler: src/api/insert.default
     events:
@@ -69,8 +62,15 @@ functions:
           method: post
           path: api/delete/{id}
 
+  api-doc:
+    handler: src/api/docs.default
+    events:
+      - http:
+          method: get
+          path: /docs
+
   messages-app:
-    handler: src/jameda/messages.default
+    handler: src/app/messages.default
     events:
       - http:
           method: get

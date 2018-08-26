@@ -16,7 +16,7 @@
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: 2rem;
         }
 
         h1,
@@ -48,18 +48,21 @@
         }
 
         input::placeholder {
-            color: #eee;
+            color: #ccc;
         }
 
         input[type="submit"] {
-            background: #666;
+            background: #01a3d4;
             color: #eee;
             border: none;
         }
 
         .messages {
-
+            max-width: 100%;
+            width: 800px;
             padding: 1rem;
+            margin: 2rem auto;
+            position: relative;
         }
 
         .messages__container {
@@ -81,12 +84,14 @@
             color: #aaa;
             font-style: italic;
             padding-right: 1rem;
-            width: 20%;
+            width: 50px;
+            flex-shrink: 0;
             text-align: right;
         }
 
         .messages__date {
-            width: 1 0%;
+            width: 150px;
+            flex-shrink: 0;
             font-size: 0.7em;
             color: #aaa;
             font-style: italic;
@@ -95,6 +100,7 @@
 
         .messages__icon {
             padding: 0 1rem;
+            color: #aaa;
         }
 
         .messages__text {
@@ -106,10 +112,12 @@
             background: none;
             border: none;
             cursor: pointer;
+            align-self: flex-start;
         }
 
         .messages__delete i {
             pointer-events: none;
+            color: #b00;
         }
 
         .messages__delete:focus {
@@ -121,7 +129,7 @@
 <body>
     <h1>Jameda message board</h1>
     <form class="messageForm" autocomplete="off">
-        <h2>Send your own message</h2>
+        <h2>Send a message</h2>
         <input type="text" name="name" placeholder="Your name">
         <input type="text" name="message" placeholder="Type your message">
         <input type="submit" value="Send message">
@@ -161,10 +169,7 @@
             messagesContainer.innerHTML = messagesContainer.innerHTML + item
         })
         const deleteButtons = document.querySelectorAll('.messages__delete')
-        deleteButtons.forEach(button => {
-            console.log(button)
-            button.addEventListener('click', deleteMessage)
-        })
+        deleteButtons.forEach(button => button.addEventListener('click', deleteMessage))
         return messages.length
     }
 
@@ -184,6 +189,7 @@
         await fetch(`api/delete/${id}`, {
             method: 'POST'
         })
+        loadMessages()
     }
 
     const handleFormSubmit = async e => {
@@ -207,14 +213,12 @@
 
     const resetForm = form => {
         const inputs = form.querySelectorAll('input')
-        inputs.forEach(input => input.type === 'text' ? input.value = '' : null)
+        inputs.forEach(input => input.name === 'message' ? input.value = '' : null)
     }
 
     form.addEventListener("submit", handleFormSubmit)
 
     loadMessages()
-        .then(response => console.log("%d messages loaded", response))
-        .catch(error => console.error(error))
 
 </script>
 
