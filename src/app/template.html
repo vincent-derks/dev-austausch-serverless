@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Messages App - Jameda Dev Austausch</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #eee;
+            color: #666;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .messageForm {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            left: 50%;
+            margin-left: -150px;
+            position: relative;
+            border-radius: 0.3rem;
+            overflow: hidden;
+        }
+
+        input {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        input::placeholder {
+            color: #ccc;
+        }
+
+        input[type="submit"] {
+            background: #01a3d4;
+            color: #eee;
+            border: none;
+        }
+
+        .messages {
+            max-width: 100%;
+            width: 800px;
+            padding: 1rem;
+            margin: 2rem auto;
+            position: relative;
+        }
+
+        .messages__container {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .messages__messageItem {
+            padding: 0.5rem 0;
+            background: #ddd;
+            margin-bottom: 0.5rem;
+            border-radius: 0.2rem;
+            display: flex;
+        }
+
+        .messages__name {
+            font-size: 0.7em;
+            color: #aaa;
+            font-style: italic;
+            padding-right: 1rem;
+            width: 50px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .messages__date {
+            width: 150px;
+            flex-shrink: 0;
+            font-size: 0.7em;
+            color: #aaa;
+            font-style: italic;
+            padding-left: 1rem;
+        }
+
+        .messages__icon {
+            padding: 0 1rem;
+            color: #aaa;
+        }
+
+        .messages__text {
+            flex-grow: 1;
+        }
+
+        .messages__delete {
+            margin-right: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        .messages__delete i {
+            pointer-events: none;
+            color: #b00;
+        }
+
+        .messages__delete:focus {
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jameda message board</h1>
+    <form class="messageForm" autocomplete="off">
+        <h2>Send a message</h2>
+        <input type="text" name="name" placeholder="Your name">
+        <input type="text" name="message" placeholder="Type your message">
+        <input type="submit" value="Send message">
+    </form>
+    <section class="messages">
+        <h2>Messages</h2>
+        <ul class="messages__container">
+        </ul>
+    </section>
+
+</body>
+<script type="text/javascript">
+
+    const messagesContainer = document.querySelector('.messages__container')
+    const form = document.querySelector('form');
+
+    const fetchMessages = async () => {
+        const fetchMessages = await fetch('/api/get')
+        const messagesJson = await fetchMessages.json()
+        return messagesJson
+    }
+
+    const loadMessages = async () => {
+        const messages = await fetchMessages()
+        messagesContainer.innerHTML = ''
+        const listItems = messages.sort(sortByTimestamp).forEach(message => {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            const posted_at = new Date(message.inserted_at).toLocaleDateString('de-DE', options)
+            const item = `
+                <li class="messages__messageItem messages__message-${message.id}">
+                    <i class="messages__icon fas fa-comment"></i>
+                    <span class="messages__date">${posted_at}</span>
+                    <span class="messages__name">${message.name}: </span>
+                    <span class="messages__text">"${message.message}"</span>
+                    <button data-id="${message.id}" class="messages__delete"><i class="fas fa-trash-alt"></i></button>
+                </li>`
+            messagesContainer.innerHTML = messagesContainer.innerHTML + item
+        })
+        const deleteButtons = document.querySelectorAll('.messages__delete')
+        deleteButtons.forEach(button => button.addEventListener('click', deleteMessage))
+        return messages.length
+    }
+
+    const saveMessage = async formData => {
+        try {
+            await fetch("api/insert", {
+                method: "POST",
+                body: JSON.stringify(formData)
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const deleteMessage = async e => {
+        const id = e.target.getAttribute('data-id')
+        await fetch(`api/delete/${id}`, {
+            method: 'POST'
+        })
+        loadMessages()
+    }
+
+    const handleFormSubmit = async e => {
+        e.preventDefault()
+        const formData = new FormData(form)
+        const formObject = formDataToObject(formData)
+        await saveMessage(formObject)
+        resetForm(form)
+        loadMessages()
+    }
+
+    const formDataToObject = formData => {
+        const object = {};
+        formData.forEach(function (value, key) {
+            object[key] = value;
+        });
+        return object;
+    }
+
+    const sortByTimestamp = (a, b) => b.inserted_at - a.inserted_at
+
+    const resetForm = form => {
+        const inputs = form.querySelectorAll('input')
+        inputs.forEach(input => input.name === 'message' ? input.value = '' : null)
+    }
+
+    form.addEventListener("submit", handleFormSubmit)
+
+    loadMessages()
+
+</script>
+
+</html>
